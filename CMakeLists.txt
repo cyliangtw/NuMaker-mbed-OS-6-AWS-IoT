@@ -62,7 +62,7 @@ if("NU_IOT_M2354" IN_LIST MBED_TARGET_LABELS)
     add_subdirectory(targets/TARGET_NUVOTON/TARGET_M2354/LCD)
     target_include_directories(mbed-nu-iot-m2354
         INTERFACE
-            TARGET_NU_IOT_M2354
+            targets/TARGET_NUVOTON/TARGET_NU_IOT_M2354
     )
     target_link_libraries(mbed-nu-iot-m2354
         INTERFACE
