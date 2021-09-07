@@ -1,0 +1,53 @@
+{
+    "NUMAKER_M483KG": {
+        "inherits": [
+            "MCU_M480"
+        ],
+        "device_name": "M483KGCAE2A",
+        "detect_code": [
+            "1301"
+        ],
+        "overrides": {
+            "usb-uart": "UART_0",
+            "usb-uart-tx": "PB_13",
+            "usb-uart-rx": "PB_12",
+            "spim-ccm-enable": 0,
+            "network-default-interface-type": null
+        },
+        "mbed_rom_start": "0x0",
+        "mbed_rom_size": "0x40000",
+        "mbed_ram_start": "0x20000000",
+        "mbed_ram_size": "0x20000"
+    },
+    "NU_IOT_M2354": {
+        "inherits": [
+            "MCU_M2354"
+        ],
+        "device_name": "M2354KJFAE",
+        "detect_code": [
+            "1301"
+        ],
+        "overrides": {
+            "hxt-present": false,
+            "usb-uart": "UART_0",
+            "usb-uart-tx": "PB_9",
+            "usb-uart-rx": "PB_8"
+        },
+        "OUTPUT_EXT": "bin",
+        "components_add": [
+            "TFM_S_FW"
+        ],
+        "post_binary_hook": {
+            "function": "NuM2354Code.merge_secure"
+        },
+        "secure_image_filename": "tfm_s.bin",
+        "tfm_target_name": "nuvoton/m2354",
+        "tfm_bootloader_supported": true,
+        "tfm_default_toolchain": "GNUARM",
+        "tfm_supported_toolchains": [
+            "ARMCLANG",
+            "GNUARM"
+        ],
+        "tfm_delivery_dir": "TARGET_NU_IOT_M2354/COMPONENT_TFM_S_FW"
+    }
+}

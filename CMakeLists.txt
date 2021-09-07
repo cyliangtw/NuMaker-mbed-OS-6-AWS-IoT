@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
 
 set(MBED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mbed-os CACHE INTERNAL "")
 set(MBED_CONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
-set(APP_TARGET NuMaker-mbed-AWS-IoT-example_6)
+set(APP_TARGET NuMaker-mbed-6-AWS-IoT)
 
 include(${MBED_PATH}/tools/cmake/app.cmake)
 
@@ -55,6 +55,33 @@ if("DEVICE_FLASH=1" IN_LIST MBED_TARGET_DEFINITIONS)
             mbed-storage-kvstore
     )
 endif()
+
+if("NU_IOT_M2354" IN_LIST MBED_TARGET_LABELS)
+    add_library(mbed-nu-iot-m2354 INTERFACE)
+    add_subdirectory(targets/TARGET_NUVOTON/TARGET_NU_IOT_M2354)
+    add_subdirectory(targets/TARGET_NUVOTON/TARGET_M2354/LCD)
+    target_include_directories(mbed-nu-iot-m2354
+        INTERFACE
+            TARGET_NU_IOT_M2354
+    )
+    target_link_libraries(mbed-nu-iot-m2354
+        INTERFACE
+            mbed-m2354
+            mbed-m2354-tfm
+            mbed-m2354-lcd 
+    )
+endif()
+
+if("NU_M2354" IN_LIST MBED_TARGET_LABELS)
+    add_subdirectory(targets/TARGET_NUVOTON/TARGET_M2354/LCD)
+    target_link_libraries(mbed-nu-m2354
+        INTERFACE
+            mbed-m2354
+            mbed-m2354-tfm
+            mbed-m2354-lcd 
+    )
+endif()
+
 
 mbed_set_post_build(${APP_TARGET})
 

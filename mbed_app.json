@@ -45,6 +45,16 @@
             "esp8266.rst"                           : "PC_13",
             "esp8266.provide-default"               : true
         },
+        "NU_IOT_M2354": {
+            "target.network-default-interface-type" : "WIFI",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "esp8266.tx"                            : "PC_7",
+            "esp8266.rx"                            : "PC_6",
+            "esp8266.rts"                           : "PE_13",
+            "esp8266.cts"                           : "PC_8",
+            "esp8266.rst"                           : "PE_12",
+            "esp8266.provide-default"               : true
+        },
         "NUMAKER_IOT_M263A": {
             "target.network-default-interface-type" : "WIFI",
             "my-tlssocket.tls-max-frag-len"         : 4,

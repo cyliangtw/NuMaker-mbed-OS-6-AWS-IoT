@@ -536,6 +536,7 @@ volatile uint16_t   AWS_IoT_MQTT_Test::_message_arrive_count = 0;
 
 #if AWS_IOT_HTTPS_TEST
 
+
 /**
  * /brief   AWS_IoT_HTTPS_Test implements the logic with AWS IoT User/Thing Shadow topics (publish-only)
  *          and Thing Shadow RESTful API through HTTPS.
@@ -591,6 +592,7 @@ public:
 
             /* Open a network socket on the network stack of the given network interface */
             printf("Opening network socket on network stack\n");
+	    
             tls_rc = _tlssocket->open(_net_iface);
             if (tls_rc != NSAPI_ERROR_OK) {
                 printf("Opens network socket on network stack failed: %d\n", tls_rc);
@@ -806,19 +808,27 @@ protected:
 
 #endif  // End of AWS_IOT_HTTPS_TEST
 
-int main() {
+#include "lcd_api.h"
 
+int main() {
+    char lcdStr[32];
     /* The default 9600 bps is too slow to print full TLS debug info and could
      * cause the other party to time out. */
 
     printf("\nStarting AWS IoT test\n");
+
+    printf("Enable LCD program ...\r\n");
+    lcd_init();
 
 #if defined(MBED_MAJOR_VERSION)
     printf("Using Mbed OS %d.%d.%d\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
 #else
     printf("Using Mbed OS from master.\n");
 #endif
-
+    
+    strcpy(lcdStr, "Open...");
+    //lcd_printf(lcdStr);
+    lcd_printNumber(100);
     NetworkInterface *net = NetworkInterface::get_default_instance();
     if (NULL == net) {
         printf("Connecting to the network failed. See serial output.\n");
@@ -836,6 +846,9 @@ int main() {
         return -1;
     }
     printf("Connected to the network successfully. IP address: %s\n", sockaddr.get_ip_address());
+    strcpy(lcdStr, sockaddr.get_ip_address());
+//    lcd_printf(lcdStr);
+    lcd_printNumber(200);
 
 #if AWS_IOT_MQTT_TEST
     AWS_IoT_MQTT_Test *mqtt_test = new AWS_IoT_MQTT_Test(AWS_IOT_MQTT_SERVER_NAME, AWS_IOT_MQTT_SERVER_PORT, net);
