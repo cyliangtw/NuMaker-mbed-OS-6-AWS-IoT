@@ -1,0 +1,66 @@
+{
+    "macros": [
+        "MBED_CONF_APP_MAIN_STACK_SIZE=4096",
+        "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_user_config.h\""
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate"              : 115200,
+            "platform.stdio-convert-newlines"       : true,
+            "platform.heap-stats-enabled"           : 1,
+            "platform.stack-stats-enabled"          : 1,
+            "mbed-trace.enable"                     : null,
+            "nsapi.default-wifi-security"           : "WPA_WPA2",
+            "nsapi.default-wifi-ssid"               : "\"SSID\"",
+            "nsapi.default-wifi-password"           : "\"PASSWORD\""
+        },
+        "NUMAKER_PFM_NUC472": {
+            "target.network-default-interface-type" : "ETHERNET",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "target.macros_add"                     : ["MBEDTLS_ENTROPY_HARDWARE_ALT"]
+        },
+        "NUMAKER_PFM_M487": {
+            "target.network-default-interface-type" : "ETHERNET",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "target.macros_add"                     : ["MBEDTLS_ENTROPY_HARDWARE_ALT"]
+        },
+        "NUMAKER_IOT_M487": {
+            "target.network-default-interface-type" : "WIFI",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "esp8266.tx"                            : "PH_8",
+            "esp8266.rx"                            : "PH_9",
+            "esp8266.rts"                           : "A2",
+            "esp8266.cts"                           : "A3",
+            "esp8266.rst"                           : "PH_3",
+            "esp8266.provide-default"               : true,
+            "target.macros_add"                     : ["MBEDTLS_ENTROPY_HARDWARE_ALT"]
+        },
+        "NU_M2354": {
+            "target.network-default-interface-type" : "WIFI",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "esp8266.tx"                            : "PC_7",
+            "esp8266.rx"                            : "PC_6",
+            "esp8266.rts"                           : "PE_13",
+            "esp8266.cts"                           : "PC_8",
+            "esp8266.rst"                           : "PC_13",
+            "esp8266.provide-default"               : true
+        },
+        "NUMAKER_IOT_M263A": {
+            "target.network-default-interface-type" : "WIFI",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "esp8266.tx"                            : "PC_7",
+            "esp8266.rx"                            : "PC_6",
+            "esp8266.rts"                           : "PE_13",
+            "esp8266.cts"                           : "PC_8",
+            "esp8266.rst"                           : "PE_12",
+            "esp8266.provide-default"               : true
+        }
+    },
+    "config": {
+        "crypto-prng-present": {
+            "help"              : "With MBEDTLS_ENTROPY_HARDWARE_ALT defined, entropy is implemented with EADC+PRNG alternatively. On rare targets without PRNG e.g. M482, disable this configuration option to go EADC+S/W random.",
+            "value"             : true,
+            "macro_name"        : "NU_CRYPTO_PRNG_PRESENT"
+        }
+    }
+}

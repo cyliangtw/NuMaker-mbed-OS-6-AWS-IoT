@@ -1,0 +1,13 @@
+{
+    "name": "my-tlssocket",
+    "config": {
+        "tls-debug-level": {
+            "help": "Debug level for TLS. Larger value for more verbose message. Its value can be 0, 1, 2, 3, or 4",
+            "value": 0
+        },
+        "tls-max-frag-len": {
+            "help": "Maximum fragment length value for the payload in one packet, doesn't include TLS header and encryption overhead. Is needed for constrainted devices having low MTU sizes, Value 0 = disabled, 1 = MBEDTLS_SSL_MAX_FRAG_LEN_512, 2= MBEDTLS_SSL_MAX_FRAG_LEN_1024, 3 = MBEDTLS_SSL_MAX_FRAG_LEN_2048, 4 = MBEDTLS_SSL_MAX_FRAG_LEN_4096",
+            "value": 0
+        }
+    }
+}

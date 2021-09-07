@@ -1,0 +1,50 @@
+{
+    "macros": [
+        "MBED_CONF_APP_MAIN_STACK_SIZE=4096",
+        "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_user_config.h\""
+    ],
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate"              : 115200,
+            "platform.stdio-convert-newlines"       : true,
+            "platform.heap-stats-enabled"           : 1,
+            "platform.stack-stats-enabled"          : 1,
+            "mbed-trace.enable"                     : null,
+            "lwip.ipv4-enabled"                     : true,
+            "lwip.ipv6-enabled"                     : false,
+            "lwip.ethernet-enabled"                 : false,
+            "lwip.ppp-enabled"                      : false,
+            "lwip.tcp-enabled"                      : false,
+            "cellular.debug-at"                     : false,
+            "nsapi.default-cellular-plmn"           : 0,
+            "nsapi.default-cellular-sim-pin"        : 0,
+            "nsapi.default-cellular-apn"            : "\"internet.iot\"",
+            "nsapi.default-cellular-username"       : 0,
+            "nsapi.default-cellular-password"       : 0
+        },
+        "NUMAKER_PFM_M487": {
+            "target.network-default-interface-type" : "CELLULAR",
+            "QUECTEL_BG96.provide-default"          : true,
+            "QUECTEL_BG96.tx"                       : "D1",
+            "QUECTEL_BG96.rx"                       : "D0",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "target.macros_add"                     : ["MBEDTLS_ENTROPY_HARDWARE_ALT"]
+        },
+        "NUMAKER_IOT_M487": {
+            "target.network-default-interface-type" : "CELLULAR",
+            "QUECTEL_BG96.provide-default"          : true,
+            "QUECTEL_BG96.tx"                       : "D1",
+            "QUECTEL_BG96.rx"                       : "D0",
+            "my-tlssocket.tls-max-frag-len"         : 4,
+            "target.macros_add"                     : ["MBEDTLS_ENTROPY_HARDWARE_ALT"]
+        }
+    },
+    "config": {
+        "crypto-prng-present": {
+            "help"              : "With MBEDTLS_ENTROPY_HARDWARE_ALT defined, entropy is implemented with EADC+PRNG alternatively. On rare targets without PRNG e.g. M482, disable this configuration option to go EADC+S/W random.",
+            "accepted_values"   : [0, 1],
+            "value"             : 1,
+            "macro_name"        : "NU_CRYPTO_PRNG_PRESENT"
+        }
+    }
+}
