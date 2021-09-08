@@ -28,7 +28,7 @@ extern "C" {
 
 void lcd_init(void);
 void lcd_free(void);
-void lcd_printf(char *InputStr);
+void lcd_printf(const char *InputStr);
 void lcd_putChar(uint32_t u32Index, uint8_t u8Ch);
 void lcd_printNumber(uint32_t InputNum);
 void lcd_setSymbol(uint32_t u32Symbol, uint32_t u32OnOff);

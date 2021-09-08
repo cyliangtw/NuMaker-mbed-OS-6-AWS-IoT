@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <string.h>
 #include "lcd_api.h"
 #include "lcdlib.h"
 
@@ -44,7 +44,7 @@
 /*---------------------------------------------------------------------------------------------------------*/
 /* Functions and variables declaration                                                                     */
 /*---------------------------------------------------------------------------------------------------------*/
-#define LCD_ALPHABET_NUM    7
+#define LCD_ALPHABET_NUM    8
 static S_LCD_CFG_T g_LCDCfg =
 {
     __LIRC,                     /*!< LCD clock source frequency */
@@ -155,7 +155,7 @@ static void configure_lcd_pins(void)
 
 void lcd_init(void)
 {
-    uint32_t u32ActiveFPS;
+    uint32_t u32ActiveFPS = 0ul;
     // Validation
     // MBED_ASSERT(...)
   
@@ -180,7 +180,10 @@ void lcd_init(void)
     // Open LCD
     /* LCD Initialize and calculate real frame rate */
     u32ActiveFPS = LCD_Open(&g_LCDCfg); 
-
+    if( u32ActiveFPS == 0x00 ) {
+        printf("LCD Open failed \r\n");
+    }
+    
     /* Enable charge pump clock MIRC and output voltage level 2 for 3.0V */
     if(g_LCDCfg.u32VSrc == LCD_VOLTAGE_SOURCE_CP) {
         CLK_EnableModuleClock_S(LCDCP_MODULE);
@@ -214,13 +217,13 @@ void lcd_free(void)
     /* Free up pins to be GPIO */
 }
 
-void lcd_printf(char *InputStr)
+void lcd_printf(const char *InputStr)
 {
     char text[LCD_ALPHABET_NUM+1];
     
-    memset(text, 0x00, sizeof(text));
+    memset((void*)text, 0x00, sizeof(text));
     if(strlen(InputStr) >= LCD_ALPHABET_NUM) {
-        strncp(text, InputStr, LCD_ALPHABET_NUM);
+        strncpy(text, InputStr, LCD_ALPHABET_NUM);
     } else {
         strcpy(text, InputStr);
     }

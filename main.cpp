@@ -22,6 +22,12 @@
 #include "MQTTClient.h"
 #endif  // End of AWS_IOT_MQTT_TEST
 
+#ifdef TARGET_M2354
+#include "lcd_api.h"
+#else
+#define lcd_init()
+#define lcd_printf(X)
+#endif
 
 namespace {
 
@@ -311,7 +317,7 @@ public:
                 break;
             }
             printf("Connects with %s:%d OK\n", _domain, _port);
-
+            
             /* See the link below for AWS IoT support for MQTT:
              * http://docs.aws.amazon.com/iot/latest/developerguide/protocols.html */
 
@@ -355,7 +361,7 @@ public:
             conn_data.clientID.cstring = client_id_data;
 #endif
             printf("Resolved MQTT client ID: %s\n", conn_data.clientID.cstring);
-
+            lcd_printf(client_id_data);
             /* The message broker does not support persistent sessions (connections made with 
              * the cleanSession flag set to false. The AWS IoT message broker assumes all sessions 
              * are clean sessions and messages are not stored across sessions. If an MQTT client 
@@ -374,35 +380,40 @@ public:
                 break;
             }
             printf("\rMQTT connects OK\n\n");
-
+            lcd_printf("CONNECT");
+            
             /* Subscribe/publish user topic */
             printf("Subscribing/publishing user topic\n");
             if (! sub_pub_topic(USER_MQTT_TOPIC, USER_MQTT_TOPIC_FILTERS, sizeof (USER_MQTT_TOPIC_FILTERS) / sizeof (USER_MQTT_TOPIC_FILTERS[0]), USER_MQTT_TOPIC_PUBLISH_MESSAGE)) {
                 break;
             }
             printf("Subscribes/publishes user topic OK\n\n");
-
+            lcd_printf("USER OK");
+            
             /* Subscribe/publish UpdateThingShadow topic */
             printf("Subscribing/publishing UpdateThingShadow topic\n");
             if (! sub_pub_topic(UPDATETHINGSHADOW_MQTT_TOPIC, UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS, sizeof (UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS) / sizeof (UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS[0]), UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE)) {
                 break;
             }
             printf("Subscribes/publishes UpdateThingShadow topic OK\n\n");
-
+            lcd_printf("UPDATE OK");
+            
             /* Subscribe/publish GetThingShadow topic */
             printf("Subscribing/publishing GetThingShadow topic\n");
             if (! sub_pub_topic(GETTHINGSHADOW_MQTT_TOPIC, GETTHINGSHADOW_MQTT_TOPIC_FILTERS, sizeof (GETTHINGSHADOW_MQTT_TOPIC_FILTERS) / sizeof (GETTHINGSHADOW_MQTT_TOPIC_FILTERS[0]), GETTHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE)) {
                 break;
             }
             printf("Subscribes/publishes GetThingShadow topic OK\n\n");
-
+            lcd_printf("GET OK");
+            
             /* Subscribe/publish DeleteThingShadow topic */
             printf("Subscribing/publishing DeleteThingShadow topic\n");
             if (! sub_pub_topic(DELETETHINGSHADOW_MQTT_TOPIC, DELETETHINGSHADOW_MQTT_TOPIC_FILTERS, sizeof (DELETETHINGSHADOW_MQTT_TOPIC_FILTERS) / sizeof (DELETETHINGSHADOW_MQTT_TOPIC_FILTERS[0]), DELETETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE)) {
                 break;
             }
             printf("Subscribes/publishes DeleteThingShadow topic OK\n\n");
-
+            lcd_printf("DEL OK");
+            
         } while (0);
 
         printf("MQTT disconnecting");
@@ -808,10 +819,8 @@ protected:
 
 #endif  // End of AWS_IOT_HTTPS_TEST
 
-#include "lcd_api.h"
 
 int main() {
-    char lcdStr[32];
     /* The default 9600 bps is too slow to print full TLS debug info and could
      * cause the other party to time out. */
 
@@ -826,9 +835,8 @@ int main() {
     printf("Using Mbed OS from master.\n");
 #endif
     
-    strcpy(lcdStr, "Open...");
-    //lcd_printf(lcdStr);
-    lcd_printNumber(100);
+    lcd_printf("Go Go Go");
+//    lcd_printNumber(100);
     NetworkInterface *net = NetworkInterface::get_default_instance();
     if (NULL == net) {
         printf("Connecting to the network failed. See serial output.\n");
@@ -846,9 +854,10 @@ int main() {
         return -1;
     }
     printf("Connected to the network successfully. IP address: %s\n", sockaddr.get_ip_address());
-    strcpy(lcdStr, sockaddr.get_ip_address());
-//    lcd_printf(lcdStr);
-    lcd_printNumber(200);
+    lcd_printf(sockaddr.get_ip_address());
+    ThisThread::sleep_for(500);
+    lcd_printf(sockaddr.get_ip_address() + 8);
+//    lcd_printNumber(200);
 
 #if AWS_IOT_MQTT_TEST
     AWS_IoT_MQTT_Test *mqtt_test = new AWS_IoT_MQTT_Test(AWS_IOT_MQTT_SERVER_NAME, AWS_IOT_MQTT_SERVER_PORT, net);
@@ -867,4 +876,5 @@ int main() {
     if (status != NSAPI_ERROR_OK) {
         printf("\n\nDisconnect from network interface failed %d\n", status);
     }
+    lcd_printf("End");
 }
