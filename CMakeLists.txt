@@ -24,6 +24,8 @@ target_include_directories(${APP_TARGET}
         my-tlssocket
         pre-main
         targets/TARGET_NUVOTON
+        BME680_driver
+        BME680
 )
 
 target_sources(${APP_TARGET}
@@ -37,6 +39,8 @@ target_sources(${APP_TARGET}
         pre-main/provision.cpp
         pre-main/pump_host_command.cpp
         $<$<IN_LIST:NUVOTON,${MBED_TARGET_LABELS}>:targets/TARGET_NUVOTON/platform_entropy.cpp>
+        BME680_driver/bme680.c
+        BME680/mbed_bme680.cpp
 )
 
 target_link_libraries(${APP_TARGET}
