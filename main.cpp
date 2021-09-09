@@ -12,9 +12,22 @@
 
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
+#define SENSOR_BME680_TEST      0
 
 #include "mbed.h"
 #include "MyTLSSocket.h"
+
+#if SENSOR_BME680_TEST
+#include "mbed_bme680.h"
+ 
+#if TARGET_M2354
+I2C i2c(PB_12, PB_13);
+#else
+I2C i2c(I2C_SDA, I2C_SCL);  // Used inside the BME680 Mbed Lib.
+#endif
+
+BME680 bme680(0x76 << 1);  // Slave address
+#endif  // End of SENSOR_BME680_TEST
 
 #if AWS_IOT_MQTT_TEST
 /* MQTT-specific header files */
@@ -819,6 +832,37 @@ protected:
 
 #endif  // End of AWS_IOT_HTTPS_TEST
 
+#if SENSOR_BME680_TEST
+static void sensor_test() {
+    int count = 10;
+   
+    if (!bme680.begin()) {
+        printf("BME680 Begin failed \r\n");
+        return;
+    }
+    while (true) {
+        if (++count >= 10)
+        {
+            count = 0;
+            printf("\r\nTemperature  Humidity  Pressure    VOC\r\n"
+                   "  degC*10       %%*10     hPa*10     KOhms*10\r\n"
+                   "------------------------------------------\r\n");
+        }
+ 
+        if (bme680.performReading())
+        {
+            printf("   %d        ", (int)(bme680.getTemperature()*10));
+            printf("%d      ", (int)(bme680.getHumidity()*10));
+            printf("%d      ", (int)(bme680.getPressure() / 100*10));
+            printf("%d\r\n", (int)(bme680.getGasResistance() / 1000*10));
+        }
+ 
+        thread_sleep_for(1000);
+    }    
+}
+#else
+#define sensor_test()
+#endif  // End of SENSOR_BME680_TEST
 
 int main() {
     /* The default 9600 bps is too slow to print full TLS debug info and could
@@ -829,6 +873,8 @@ int main() {
     printf("Enable LCD program ...\r\n");
     lcd_init();
 
+    sensor_test();
+    
 #if defined(MBED_MAJOR_VERSION)
     printf("Using Mbed OS %d.%d.%d\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
 #else
