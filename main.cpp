@@ -12,7 +12,7 @@
 
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
-#define SENSOR_BME680_TEST      0
+#define SENSOR_BME680_TEST      1
 
 #include "mbed.h"
 #include "MyTLSSocket.h"
