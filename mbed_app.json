@@ -9,6 +9,7 @@
             "platform.stdio-convert-newlines"       : true,
             "platform.heap-stats-enabled"           : 1,
             "platform.stack-stats-enabled"          : 1,
+            "platform.minimal-printf-enable-floating-point"  : true,
             "mbed-trace.enable"                     : null,
             "nsapi.default-wifi-security"           : "WPA_WPA2",
             "nsapi.default-wifi-ssid"               : "\"SSID\"",

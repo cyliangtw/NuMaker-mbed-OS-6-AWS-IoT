@@ -845,18 +845,24 @@ static void sensor_test() {
         {
             count = 0;
             printf("\r\nTemperature  Humidity  Pressure    VOC\r\n"
-                   "  degC*10       %%*10     hPa*10     KOhms*10\r\n"
+                   "    degC        %%        hPa      KOhms\r\n"
                    "------------------------------------------\r\n");
         }
  
         if (bme680.performReading())
         {
-            printf("   %d        ", (int)(bme680.getTemperature()*10));
-            printf("%d      ", (int)(bme680.getHumidity()*10));
-            printf("%d      ", (int)(bme680.getPressure() / 100*10));
-            printf("%d\r\n", (int)(bme680.getGasResistance() / 1000*10));
+#if 0
+            printf("   %d/10    ", (int)(bme680.getTemperature()*10));
+            printf("%d/10    ", (int)(bme680.getHumidity()*10));
+            printf("%d/10    ", (int)(bme680.getPressure() / 100*10));
+            printf("%d/10\r\n", (int)(bme680.getGasResistance() / 1000*10));
+#else
+            printf("   %.2f      ", bme680.getTemperature());
+            printf("%.2f    ", bme680.getHumidity());
+            printf("%.2f    ", bme680.getPressure() / 100.0);
+            printf("%0.2f\r\n", bme680.getGasResistance() / 1000.0);
+#endif
         }
- 
         thread_sleep_for(1000);
     }    
 }
