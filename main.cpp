@@ -13,6 +13,7 @@
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
 #define SENSOR_BME680_TEST      1
+#define NVT_DEMO_SENSOR         1
 
 #include "mbed.h"
 #include "MyTLSSocket.h"
@@ -144,7 +145,13 @@ const char *UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS[] = {
     "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/update/accepted",
     "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/update/rejected"
 };
+
+#ifndef NVT_DEMO_SENSOR
 const char UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"state\": { \"reported\": { \"attribute1\": 3, \"attribute2\": \"1\" } } }";
+#else
+//const char UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"state\": { \"reported\": { \"temperature\": %2.2f } } }";
+const char UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"state\": { \"reported\": { \"clientName\":\"%s\", \"temperature\": %2.2f, \"humidity\": %2.2f, \"pressure\": %.2f } } }";
+#endif
 
 /* Get thing shadow */
 const char GETTHINGSHADOW_MQTT_TOPIC[] = "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/get";
@@ -279,6 +286,7 @@ public:
 
         int tls_rc;
         int mqtt_rc;
+        char cClientName[32];
 
         do {
             /* Set host name of the remote host, used for certificate checking */
@@ -373,6 +381,7 @@ public:
 #endif
             conn_data.clientID.cstring = client_id_data;
 #endif
+            strncpy(cClientName, conn_data.clientID.cstring, sizeof(cClientName));
             printf("Resolved MQTT client ID: %s\n", conn_data.clientID.cstring);
             lcd_printf(client_id_data);
             /* The message broker does not support persistent sessions (connections made with 
@@ -392,9 +401,10 @@ public:
                 printf("\rMQTT connects failed: %d\n", mqtt_rc);
                 break;
             }
+
             printf("\rMQTT connects OK\n\n");
             lcd_printf("CONNECT");
-            
+#ifndef NVT_DEMO_SENSOR
             /* Subscribe/publish user topic */
             printf("Subscribing/publishing user topic\n");
             if (! sub_pub_topic(USER_MQTT_TOPIC, USER_MQTT_TOPIC_FILTERS, sizeof (USER_MQTT_TOPIC_FILTERS) / sizeof (USER_MQTT_TOPIC_FILTERS[0]), USER_MQTT_TOPIC_PUBLISH_MESSAGE)) {
@@ -426,8 +436,31 @@ public:
             }
             printf("Subscribes/publishes DeleteThingShadow topic OK\n\n");
             lcd_printf("DEL OK");
-            
+#endif
         } while (0);
+
+#ifdef NVT_DEMO_SENSOR
+        char cDataBuffer[ 256 ];
+        char cLcdStr [8];
+        do {
+            /* Subscribe/publish UpdateThingShadow topic */
+            printf("Subscribing/publishing UpdateThingShadow topic\n");
+            if (bme680.performReading()) {
+//                ( void ) snprintf(cDataBuffer, sizeof(cDataBuffer) - 1, UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE, bme680.getHumidity() );
+                ( void ) snprintf(cDataBuffer, sizeof(cDataBuffer) - 1, UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE, cClientName, bme680.getTemperature(), bme680.getHumidity(), bme680.getPressure() );
+                if (! sub_pub_topic(UPDATETHINGSHADOW_MQTT_TOPIC, UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS, sizeof (UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS) / sizeof (UPDATETHINGSHADOW_MQTT_TOPIC_FILTERS[0]), (const char*)cDataBuffer)) {
+                    break;
+                }
+                printf("Subscribes/publishes UpdateThingShadow topic OK\n\n");
+                snprintf(cLcdStr, sizeof(cLcdStr) - 1, "%2.2f", bme680.getHumidity());
+                lcd_printf(cLcdStr);
+            } else {
+                printf("Read Sensor failed OK\n\n");
+                lcd_printf("SENSOR FAIL");
+            }
+            thread_sleep_for(1000);
+        } while (1);
+#endif
 
         printf("MQTT disconnecting");
         if ((mqtt_rc = _mqtt_client->disconnect()) != 0) {
@@ -840,7 +873,7 @@ static void sensor_test() {
         printf("BME680 Begin failed \r\n");
         return;
     }
-    while (true) {
+    do {
         if (++count >= 10)
         {
             count = 0;
@@ -851,20 +884,13 @@ static void sensor_test() {
  
         if (bme680.performReading())
         {
-#if 0
-            printf("   %d/10    ", (int)(bme680.getTemperature()*10));
-            printf("%d/10    ", (int)(bme680.getHumidity()*10));
-            printf("%d/10    ", (int)(bme680.getPressure() / 100*10));
-            printf("%d/10\r\n", (int)(bme680.getGasResistance() / 1000*10));
-#else
             printf("   %.2f      ", bme680.getTemperature());
             printf("%.2f    ", bme680.getHumidity());
             printf("%.2f    ", bme680.getPressure() / 100.0);
             printf("%0.2f\r\n", bme680.getGasResistance() / 1000.0);
-#endif
         }
         thread_sleep_for(1000);
-    }    
+    } while(0);
 }
 #else
 #define sensor_test()
