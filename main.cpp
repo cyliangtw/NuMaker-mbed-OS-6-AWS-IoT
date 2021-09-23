@@ -13,7 +13,9 @@
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
 #define SENSOR_BME680_TEST      1
+#if SENSOR_BME680_TEST
 #define NVT_DEMO_SENSOR         1
+#endif
 
 #include "mbed.h"
 #include "MyTLSSocket.h"
@@ -452,7 +454,7 @@ public:
                     break;
                 }
                 printf("Subscribes/publishes UpdateThingShadow topic OK\n\n");
-                snprintf(cLcdStr, sizeof(cLcdStr) - 1, "%2.2f", bme680.getHumidity());
+                snprintf(cLcdStr, sizeof(cLcdStr) - 1, "%2.2f", bme680.getTemperature());
                 lcd_printf(cLcdStr);
             } else {
                 printf("Read Sensor failed OK\n\n");
