@@ -24,6 +24,12 @@
 #include "mbed_bme680.h"
  
 #if TARGET_M2354
+#include "psa/protected_storage.h"
+/* User-managed UID for PS/ITS storage */
+psa_storage_uid_t uid_wifi_ssid = 0x5a5b0001;
+psa_storage_uid_t uid_wifi_passwd = 0x5a5b0002;
+uint8_t data_wifi_ssid[16];
+uint8_t data_wifi_passwd[16];
 I2C i2c(PB_12, PB_13);
 #else
 I2C i2c(I2C_SDA, I2C_SCL);  // Used inside the BME680 Mbed Lib.
@@ -906,11 +912,41 @@ int main() {
         printf("\nSSID=%s\r\n", my_ssid);
         printf("WiFi PASSWD:");
         scanf("%s",&my_passwd);
-        status = (net->wifiInterface())->connect(my_ssid, my_passwd, NSAPI_SECURITY_WPA2,0);
+#ifdef TARGET_M2354
+        /* Write data into PSA storage */
+        /* Create a new, or modify an existing, uid/value pair */
+        if (PSA_SUCCESS != psa_ps_set(uid_wifi_ssid, sizeof(my_ssid), my_ssid, PSA_STORAGE_FLAG_NONE)) {
+            printf("Store WiFi SSID into PSA storage failed \r\n");
+        }
+        if (PSA_SUCCESS != psa_ps_set(uid_wifi_passwd, sizeof(my_passwd), my_passwd, PSA_STORAGE_FLAG_NONE)) {
+            printf("Store WiFi PASWWD into PSA storage failed \r\n");
+        }
+#endif
     } else {
-        printf("\nDefault SSID=%s\r\n", MBED_CONF_NSAPI_DEFAULT_WIFI_SSID);
-        status = net->connect();
+#ifdef TARGET_M2354
+        /* Get information of data from PSA storage */
+        psa_status_t retStatus;
+        struct psa_storage_info_t data1_info;
+        size_t retLen;
+        retStatus = psa_ps_get(uid_wifi_ssid, 0, sizeof(data_wifi_ssid), &data_wifi_ssid, &retLen);
+        if (PSA_SUCCESS != retStatus) {
+            strcpy(my_ssid, MBED_CONF_NSAPI_DEFAULT_WIFI_SSID);
+        } else {
+            strcpy(my_ssid, (const char*)data_wifi_ssid);
+        }
+        retStatus = psa_ps_get(uid_wifi_passwd, 0, sizeof(data_wifi_passwd), &data_wifi_passwd, &retLen);
+        if (PSA_SUCCESS != retStatus) {
+            strcpy(my_ssid, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD);
+        } else {
+            strcpy(my_passwd, (const char*)data_wifi_passwd);
+        }
+#else
+        strcpy(my_ssid, MBED_CONF_NSAPI_DEFAULT_WIFI_SSID);
+        strcpy(my_passwd, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD);
+#endif
+        printf("\nDefault SSID=%s\r\n", my_ssid);
     }
+    status = (net->wifiInterface())->connect(my_ssid, my_passwd, NSAPI_SECURITY_WPA2,0);    
 #endif
     if (status != NSAPI_ERROR_OK) {
         printf("Connecting to the network failed %d!\n", status);
