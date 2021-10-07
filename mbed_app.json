@@ -11,6 +11,7 @@
             "platform.stack-stats-enabled"          : 1,
             "platform.minimal-printf-enable-floating-point"  : true,
             "mbed-trace.enable"                     : null,
+            "target.features_add"                   : ["EXPERIMENTAL_API"],
             "nsapi.default-wifi-security"           : "WPA_WPA2",
             "nsapi.default-wifi-ssid"               : "\"SSID\"",
             "nsapi.default-wifi-password"           : "\"PASSWORD\""
