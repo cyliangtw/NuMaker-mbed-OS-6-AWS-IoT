@@ -1,0 +1,7 @@
+mbed-os/connectivity/FEATURE_BLE/*
+mbed-os/connectivity/lorawan/*
+mbed-os/connectivity/nfc/*
+mbed-os/connectivity/drivers/802.15.4_RF/*
+mbed-os/connectivity/drivers/ble/*
+mbed-os/connectivity/drivers/lora/*
+mbed-os/connectivity/drivers/nfc/*
