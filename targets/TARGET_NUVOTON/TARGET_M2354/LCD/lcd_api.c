@@ -50,7 +50,7 @@ static S_LCD_CFG_T g_LCDCfg =
     __LIRC,                     /*!< LCD clock source frequency */
     LCD_COM_DUTY_1_8,           /*!< COM duty */
     LCD_BIAS_LV_1_4,            /*!< Bias level */
-    30,                         /*!< Operation frame rate */
+    60,                         /*!< Operation frame rate */
     LCD_WAVEFORM_TYPE_A_NORMAL, /*!< Waveform type */
     LCD_DISABLE_ALL_INT,        /*!< Interrupt source */
     LCD_LOW_DRIVING_AND_BUF_ON, /*!< Driving mode */
@@ -217,7 +217,7 @@ void lcd_free(void)
     /* Free up pins to be GPIO */
 }
 
-void lcd_printf(const char *InputStr)
+void lcd_printf(uint32_t u32Zone, const char *InputStr)
 {
     char text[LCD_ALPHABET_NUM+1];
     
@@ -227,7 +227,7 @@ void lcd_printf(const char *InputStr)
     } else {
         strcpy(text, InputStr);
     }
-    LCDLIB_Printf(ZONE_MAIN_DIGIT, text);
+    LCDLIB_Printf(u32Zone, text);
 }
 
 void lcd_putChar(uint32_t u32Index, uint8_t u8Ch)
@@ -235,9 +235,14 @@ void lcd_putChar(uint32_t u32Index, uint8_t u8Ch)
     LCDLIB_PutChar(ZONE_MAIN_DIGIT, u32Index, u8Ch);
 }
 
-void lcd_printNumber(uint32_t InputNum)
+void lcd_printNumber(uint32_t u32Zone, uint32_t InputNum)
 {
-    LCDLIB_PrintNumber(ZONE_MAIN_DIGIT, InputNum);
+    LCDLIB_PrintNumber(u32Zone, InputNum);
+}
+
+void lcd_printNumberEx(uint32_t u32Zone, int32_t InputNum, uint8_t u8DigiCnt)
+{
+    LCDLIB_PrintNumberEx(u32Zone, InputNum, u8DigiCnt);
 }
 
 void lcd_setSymbol(uint32_t u32Symbol, uint32_t u32OnOff)

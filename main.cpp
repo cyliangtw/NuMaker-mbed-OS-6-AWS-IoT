@@ -46,9 +46,14 @@ BME680 bme680(0x76 << 1);  // Slave address
 
 #ifdef TARGET_M2354
 #include "lcd_api.h"
+#include "lcdlib.h"
 #else
 #define lcd_init()
-#define lcd_printf(X)
+#define lcd_printf(X,X)
+#define lcd_printNumber(X,X)
+#define lcd_printNumberEx(X,X,X)
+#define lcd_setSymbol(X,X)
+
 #endif
 
 namespace {
@@ -346,7 +351,6 @@ public:
 #endif
             strncpy(cClientName, conn_data.clientID.cstring, sizeof(cClientName));
             printf("Resolved MQTT client ID: %s\n", conn_data.clientID.cstring);
-            lcd_printf(client_id_data);
             /* The message broker does not support persistent sessions (connections made with 
              * the cleanSession flag set to false. The AWS IoT message broker assumes all sessions 
              * are clean sessions and messages are not stored across sessions. If an MQTT client 
@@ -366,7 +370,28 @@ public:
             }
 
             printf("\rMQTT connects OK\n\n");
-            lcd_printf("CONNECT");
+            /* MQTT connects OK set default LCD display. */
+            char text [8];
+
+            LCD_DisableBlink();
+            lcd_printf(ZONE_MAIN_DIGIT,"   OK");
+            thread_sleep_for(800);
+            lcd_printf(ZONE_MAIN_DIGIT,"");
+            lcd_setSymbol(SYMBOL_NVT, 1);
+            lcd_printNumber(ZONE_VER_DIGIT, 101);
+            lcd_setSymbol(SYMBOL_VERSION, 1);
+            lcd_setSymbol(SYMBOL_VER_DIG_P1, 1); 
+            /* Show default pressure, hPa */
+            sprintf(text, "%4dhPa", 0000);
+            lcd_printf(ZONE_MAIN_DIGIT, text);
+            /* Show default humidity, %rH */
+            lcd_printNumberEx(ZONE_PPM_DIGIT, 00, 2);
+            lcd_setSymbol(SYMBOL_PERCENTAGE, 1);
+            /* Show default temperature, degC */    
+            lcd_printNumberEx(ZONE_TEMP_DIGIT, 00, 2);
+            lcd_setSymbol(SYMBOL_TEMP_C, 1);
+            lcd_setSymbol(SYMBOL_WIFI, 1);
+
 #ifndef NVT_DEMO_SENSOR
             /* Subscribe/publish user topic */
             printf("Subscribing/publishing user topic\n");
@@ -374,7 +399,7 @@ public:
                 break;
             }
             printf("Subscribes/publishes user topic OK\n\n");
-            lcd_printf("USER OK");
+            lcd_printf(ZONE_MAIN_DIGIT, "USER OK");
             
             /* Subscribe/publish UpdateThingShadow topic */
             printf("Subscribing/publishing UpdateThingShadow topic\n");
@@ -382,7 +407,7 @@ public:
                 break;
             }
             printf("Subscribes/publishes UpdateThingShadow topic OK\n\n");
-            lcd_printf("UPDATE OK");
+            lcd_printf(ZONE_MAIN_DIGIT, "UPDATE OK");
             
             /* Subscribe/publish GetThingShadow topic */
             printf("Subscribing/publishing GetThingShadow topic\n");
@@ -390,7 +415,7 @@ public:
                 break;
             }
             printf("Subscribes/publishes GetThingShadow topic OK\n\n");
-            lcd_printf("GET OK");
+            lcd_printf(ZONE_MAIN_DIGIT, "GET OK");
             
             /* Subscribe/publish DeleteThingShadow topic */
             printf("Subscribing/publishing DeleteThingShadow topic\n");
@@ -398,13 +423,14 @@ public:
                 break;
             }
             printf("Subscribes/publishes DeleteThingShadow topic OK\n\n");
-            lcd_printf("DEL OK");
+            lcd_printf(ZONE_MAIN_DIGIT, "DEL OK");
 #endif
         } while (0);
 
 #ifdef NVT_DEMO_SENSOR
         char cDataBuffer[ 256 ];
         char cLcdStr [8];
+        uint32_t pressure, humidity, temperature;
         do {
             /* Subscribe/publish UpdateThingShadow topic */
             printf("Subscribing/publishing UpdateThingShadow topic\n");
@@ -415,13 +441,32 @@ public:
                     break;
                 }
                 printf("Subscribes/publishes UpdateThingShadow topic OK\n\n");
-                snprintf(cLcdStr, sizeof(cLcdStr) - 1, "%2.2f", bme680.getTemperature());
-                lcd_printf(cLcdStr);
+                temperature = bme680.getTemperature();
+                pressure = bme680.getPressure()/100;
+                humidity = bme680.getHumidity();
+                sprintf(cLcdStr, "%4dhPa", pressure);
+                lcd_printf(ZONE_MAIN_DIGIT, cLcdStr);
+                lcd_printNumberEx(ZONE_TEMP_DIGIT,temperature,2);
+                lcd_printNumberEx(ZONE_PPM_DIGIT, humidity, 2);
             } else {
                 printf("Read Sensor failed OK\n\n");
-                lcd_printf("SENSOR FAIL");
+                lcd_printf(ZONE_MAIN_DIGIT, "SENSOR FAIL");
             }
-            thread_sleep_for(1000);
+            thread_sleep_for(500);
+            /*  RTC display  */
+            time_t rtctt;
+            char buffer[32];
+            uint32_t u32TimeData, u32TimeHour, u32TimeMinute;
+            rtctt = rtc_read();
+            strftime(buffer, 32, "%H:%M\n", localtime(&rtctt));
+            printf("Time as a custom formatted string = %s", buffer);
+
+            strftime(buffer, 32, "%H\n", localtime(&rtctt));
+            u32TimeHour = atoi(buffer);
+            strftime(buffer, 32, "%M\n", localtime(&rtctt));
+            u32TimeMinute = atoi(buffer);
+            u32TimeData = ( u32TimeHour *100) + u32TimeMinute ;
+            lcd_printNumber(ZONE_TIME_DIGIT, u32TimeData);
         } while (1);
 #endif
 
@@ -863,6 +908,20 @@ extern "C" {
     MBED_WEAK int fetch_host_command(void);
 }
 
+Ticker flipper;
+static volatile uint32_t g_u32RTCINT = 0;
+
+/* Add tikcer for symbol ":" blinking 1/sec  */
+void flip()
+{
+    g_u32RTCINT++;
+    if(g_u32RTCINT == 1)
+        lcd_setSymbol(SYMBOL_TIME_DIG_COL1, 1);
+    else{
+        g_u32RTCINT = 0;    
+        lcd_setSymbol(SYMBOL_TIME_DIG_COL1, 0);}
+}
+
 int main() {
     /* The default 9600 bps is too slow to print full TLS debug info and could
      * cause the other party to time out. */
@@ -872,6 +931,10 @@ int main() {
     printf("Enable LCD program ...\r\n");
     lcd_init();
 
+    lcd_printf(ZONE_MAIN_DIGIT, "START");
+    thread_sleep_for(2000);
+    lcd_printf(ZONE_MAIN_DIGIT, "");
+
     sensor_test();
     
 #if defined(MBED_MAJOR_VERSION)
@@ -880,13 +943,39 @@ int main() {
     printf("Using Mbed OS from master.\n");
 #endif
     
-    lcd_printf("Go Go Go");
-//    lcd_printNumber(100);
+    lcd_printf(ZONE_MAIN_DIGIT, "CONNECT");
+    LCD_EnableBlink(500);
+    
+    /* lcd showing RTC */
+    //set_time(1256729737);
+    time_t rtctt;
+    char buffer[32];
+    uint32_t u32TimeData, u32TimeHour, u32TimeMinute;
+    rtc_init();
+    rtctt = rtc_read();
+
+    printf("this as seconds since january 1, 1970 =%d\n", rtctt);
+
+    strftime(buffer, 32, "%H:%M\n", localtime(&rtctt));
+    printf("Time as a custom formatted string = %s", buffer);
+
+    strftime(buffer, 32, "%H\n", localtime(&rtctt));
+    u32TimeHour = atoi(buffer);
+    strftime(buffer, 32, "%M\n", localtime(&rtctt));
+    u32TimeMinute = atoi(buffer);
+    u32TimeData = ( u32TimeHour *100) + u32TimeMinute ;
+    lcd_setSymbol(SYMBOL_TIME_DIG_COL1, 1);
+    lcd_printNumber(ZONE_TIME_DIGIT, u32TimeData);
+    flipper.attach(&flip, 0.5);
+
     NetworkInterface *net = NetworkInterface::get_default_instance();
+
     if (NULL == net) {
         printf("Connecting to the network failed. See serial output.\n");
         return 1;
     }
+
+
 #ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_SSID
     nsapi_error_t status = net->connect();
 #else // For wifi interface
@@ -948,8 +1037,12 @@ int main() {
     }
     status = (net->wifiInterface())->connect(my_ssid, my_passwd, NSAPI_SECURITY_WPA2,0);    
 #endif
+
     if (status != NSAPI_ERROR_OK) {
         printf("Connecting to the network failed %d!\n", status);
+        LCD_DisableBlink();
+        thread_sleep_for(800);
+        lcd_printf(ZONE_MAIN_DIGIT, "  FAIL");
         return -1;
     }
     SocketAddress sockaddr;
@@ -959,9 +1052,9 @@ int main() {
         return -1;
     }
     printf("Connected to the network successfully. IP address: %s\n", sockaddr.get_ip_address());
-    lcd_printf(sockaddr.get_ip_address());
-    ThisThread::sleep_for(500);
-    lcd_printf(sockaddr.get_ip_address() + 8);
+//    lcd_printf(sockaddr.get_ip_address());
+//    ThisThread::sleep_for(500);
+//    lcd_printf(sockaddr.get_ip_address() + 8);
 //    lcd_printNumber(200);
 
 #if AWS_IOT_MQTT_TEST
@@ -981,5 +1074,5 @@ int main() {
     if (status != NSAPI_ERROR_OK) {
         printf("\n\nDisconnect from network interface failed %d\n", status);
     }
-    lcd_printf("End");
+    lcd_printf(ZONE_MAIN_DIGIT, "   End");
 }
