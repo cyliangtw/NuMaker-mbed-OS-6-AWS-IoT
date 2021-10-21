@@ -10,6 +10,12 @@ Currently, the following Nuvoton Mbed-enalbed boards can afford such memory foot
 - [NuMaker-PFM-M487](https://developer.mbed.org/platforms/NUMAKER-PFM-M487/)
 - [NuMaker-IoT-M487](https://os.mbed.com/platforms/NUMAKER-IOT-M487/)
 - [NuMaker-M2354](https://os.mbed.com/platforms/NUMAKER-M2354/)
+- [NuMaker-IoT-M2354 (Board page not ready yet)](https://os.mbed.com/platforms/NUMAKER-M2354/)
+
+## Supported prebuilt image
+For easy verification of AWS IoT connection on NuMaker platforms, we provided prebuilt bin file with AWS certificate & key and you could drag & drop this bin file into your NuMaker board on hand. For details, you could open the user guide in the prebuilt folder.
+Currently, you could get prebuilt bin file from the following Nuvoton boards:
+- [NuMaker-IOT-M2354](https://github.com/OpenNuvoton/M2354BSP/tree/master/SampleCode/NuMakerIoT/mbedOS6_AWS_IoT/)
 
 ## Access and manage AWS IoT Service
 To run the example, you need to register one [AWS account](https://aws.amazon.com/)
