@@ -12,7 +12,7 @@
 
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
-#define SENSOR_BME680_TEST      1
+#define SENSOR_BME680_TEST      0
 #if SENSOR_BME680_TEST
 #define NVT_DEMO_SENSOR         1
 #endif
@@ -49,11 +49,15 @@ BME680 bme680(0x76 << 1);  // Slave address
 #include "lcdlib.h"
 #else
 #define lcd_init()
-#define lcd_printf(X,X)
-#define lcd_printNumber(X,X)
-#define lcd_printNumberEx(X,X,X)
-#define lcd_setSymbol(X,X)
-
+#define lcd_printf(X0,X1)
+#define lcd_printNumber(X2,X3)
+#define lcd_printNumberEx(X4,X5,X6)
+#define lcd_setSymbol(X7,X8)
+#define LCD_EnableBlink(X)
+#define LCD_DisableBlink()
+#define SYMBOL_TIME_DIG_COL1	0
+#define ZONE_TIME_DIGIT		0
+#define ZONE_MAIN_DIGIT		0
 #endif
 
 namespace {
@@ -449,7 +453,7 @@ public:
                 lcd_printNumberEx(ZONE_TEMP_DIGIT,temperature,2);
                 lcd_printNumberEx(ZONE_PPM_DIGIT, humidity, 2);
             } else {
-                printf("Read Sensor failed OK\n\n");
+                printf("Read Sensor failed \n\n");
                 lcd_printf(ZONE_MAIN_DIGIT, "SENSOR FAIL");
             }
             thread_sleep_for(500);
@@ -975,8 +979,8 @@ int main() {
         return 1;
     }
 
-
-#ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_SSID
+#define WIFI 2
+#if (MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE != WIFI )
     nsapi_error_t status = net->connect();
 #else // For wifi interface
     char my_ssid[16];
