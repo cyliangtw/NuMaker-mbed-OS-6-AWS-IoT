@@ -23,6 +23,9 @@
 #if SENSOR_BME680_TEST
 #include "mbed_bme680.h"
  
+BME680 bme680(0x76 << 1);  // Slave address
+#endif  // End of SENSOR_BME680_TEST
+
 #if TARGET_M2354
 #include "psa/protected_storage.h"
 /* User-managed UID for PS/ITS storage */
@@ -34,9 +37,6 @@ I2C i2c(PB_12, PB_13);
 #else
 I2C i2c(I2C_SDA, I2C_SCL);  // Used inside the BME680 Mbed Lib.
 #endif
-
-BME680 bme680(0x76 << 1);  // Slave address
-#endif  // End of SENSOR_BME680_TEST
 
 #if AWS_IOT_MQTT_TEST
 /* MQTT-specific header files */
