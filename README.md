@@ -310,3 +310,17 @@ MQTT disconnects OK
     1.  Removing the line `my-tlssocket.tls-max-frag-len` in `mbed_app.json`.
     1.  Commenting out `MBEDTLS_SSL_IN_CONTENT_LEN`/`MBEDTLS_SSL_OUT_CONTENT_LEN` in `mbedtls_user_config.h`.
         This will change back to 16KiB/16KiB.
+
+-   If the default domain name server (DNS) can't work well, you could add one DNS by mbed API [add_dns_server](https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/class_d_n_s.html), for example:
+    
+    ```C++
+    ESP8266Interface wifi(D1, D0);
+    TCPSocket socket;
+    NetworkInterface *net=( NetworkInterface *)&wifi;
+    SocketAddress sockAddr;
+    wifi.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+
+    /* Add DNS info into socket-Address by set_ip_address (const char *addr)  */
+    sockAddr.set_ip_address(your-dns-addr);
+    wifi.add_dns_server(&sockAddr);
+    ``` 
