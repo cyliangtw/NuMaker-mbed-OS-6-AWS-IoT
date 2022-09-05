@@ -33,7 +33,9 @@
  *  Set this value higher to enable handling larger keys, but be aware that this
  *  will increase the stack usage.
  */
+#if !defined(MBEDTLS_MPI_MAX_SIZE)
 #define MBEDTLS_MPI_MAX_SIZE        256
+#endif
 
 #define MBEDTLS_MPI_WINDOW_SIZE     1
 
