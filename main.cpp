@@ -12,7 +12,11 @@
 
 #define AWS_IOT_MQTT_TEST       1
 #define AWS_IOT_HTTPS_TEST      0
+#if TARGET_M2354
+#define SENSOR_BME680_TEST      1
+#else
 #define SENSOR_BME680_TEST      0
+#endif
 #if SENSOR_BME680_TEST
 #define NVT_DEMO_SENSOR         1
 #endif
