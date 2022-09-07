@@ -91,8 +91,10 @@ const char SSL_CA_CERT_PEM[] = "-----BEGIN CERTIFICATE-----\n"
 /* User certificate which has been activated and attached with specific thing and policy */
 const char SSL_USER_CERT_PEM[] = "Input User Cert";
 
+
 /* User private key paired with above */
 const char SSL_USER_PRIV_KEY_PEM[] = "Input User Private Key";
+
 
 #if AWS_IOT_MQTT_TEST
 
@@ -341,13 +343,13 @@ public:
             size_t olen;
             mbedtls_hardware_poll(NULL, (unsigned char *) rand_words, sizeof(rand_words), &olen);
             snprintf(client_id_data, sizeof(client_id_data), "%08X-%08X-%08X",
-                     rand_words[0], rand_words[1], rand_words[2]);
+                     (unsigned int)rand_words[0], (unsigned int)rand_words[1],(unsigned int) rand_words[2]);
 #else
             /* Use FMC/UID to generate unique client ID */
             SYS_UnlockReg();
             FMC_Open();
             snprintf(client_id_data, sizeof(client_id_data), "%08X-%08X-%08X",
-                     FMC_ReadUID(0), FMC_ReadUID(1), FMC_ReadUID(2));
+                     (unsigned int)FMC_ReadUID(0), (unsigned int)FMC_ReadUID(1), (unsigned int)FMC_ReadUID(2));
             FMC_Close();
             SYS_LockReg();
 #endif
@@ -515,7 +517,7 @@ protected:
 
             int _bpos;
 
-            _bpos = snprintf(_buffer, sizeof (_buffer) - 1, publish_message_body);
+            _bpos = snprintf(_buffer, sizeof (_buffer) - 1, "%s", publish_message_body);
             if (_bpos < 0 || ((size_t) _bpos) > (sizeof (_buffer) - 1)) {
                 printf("snprintf failed: %d\n", _bpos);
                 break;
@@ -543,7 +545,7 @@ protected:
             Timer timer;
             timer.start();
             while (! _message_arrive_count) {
-                if (timer.read_ms() >= MQTT_RECEIVE_MESSAGE_WITH_SUBSCRIBED_TOPIC_TIMEOUT_MS) {
+                if ((timer.elapsed_time()).count()/1000 >= MQTT_RECEIVE_MESSAGE_WITH_SUBSCRIBED_TOPIC_TIMEOUT_MS) {   
                     printf("MQTT receives message with subscribed %s TIMEOUT\n", topic);
                     break;
                 }
@@ -958,7 +960,7 @@ int main() {
     rtc_init();
     rtctt = rtc_read();
 
-    printf("this as seconds since january 1, 1970 =%d\n", rtctt);
+    printf("this as seconds since january 1, 1970 =%d\n", (int)rtctt);
 
     strftime(buffer, 32, "%H:%M\n", localtime(&rtctt));
     printf("Time as a custom formatted string = %s", buffer);
@@ -970,7 +972,7 @@ int main() {
     u32TimeData = ( u32TimeHour *100) + u32TimeMinute ;
     lcd_setSymbol(SYMBOL_TIME_DIG_COL1, 1);
     lcd_printNumber(ZONE_TIME_DIGIT, u32TimeData);
-    flipper.attach(&flip, 0.5);
+    flipper.attach(&flip, 500ms);   
 
     NetworkInterface *net = NetworkInterface::get_default_instance();
 
@@ -1001,10 +1003,10 @@ int main() {
     }
     if( (choice == 'Y') || (choice == 'y') ) {
         printf("WiFi SSID:");
-        scanf("%s",&my_ssid);
+        scanf("%s", (char *)&my_ssid);
         printf("\nSSID=%s\r\n", my_ssid);
         printf("WiFi PASSWD:");
-        scanf("%s",&my_passwd);
+        scanf("%s",(char *)&my_passwd);
 #ifdef TARGET_M2354
         /* Write data into PSA storage */
         /* Create a new, or modify an existing, uid/value pair */
@@ -1019,7 +1021,7 @@ int main() {
 #ifdef TARGET_M2354
         /* Get information of data from PSA storage */
         psa_status_t retStatus;
-        struct psa_storage_info_t data1_info;
+        //struct psa_storage_info_t data1_info; 
         size_t retLen;
         retStatus = psa_ps_get(uid_wifi_ssid, 0, sizeof(data_wifi_ssid), &data_wifi_ssid, &retLen);
         if (PSA_SUCCESS != retStatus) {

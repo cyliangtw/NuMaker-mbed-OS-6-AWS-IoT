@@ -41,7 +41,7 @@ extern "C"
 #define ZONE_TEMP_SEG_NUM       7   /*!< Number of segments on each digit number */
 
 #define ZONE_VER_DIGIT          3   /*!< Version number digit display zone index */
-#define ZONE_VER_DIG_CNT        3   /*!< Number of digits, for version display */
+#define ZONE_VER_DIG_CNT        6  //3   /*!< Number of digits, for version display */
 #define ZONE_VER_SEG_NUM        7   /*!< Number of segments on each digit number */
 
 #define ZONE_TIME_DIGIT         4   /*!< Time digit display zone index */
