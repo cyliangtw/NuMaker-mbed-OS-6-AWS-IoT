@@ -517,7 +517,6 @@ protected:
 
             int _bpos;
 
-            //_bpos = snprintf(_buffer, sizeof (_buffer) - 1, publish_message_body); //Ray closed
             _bpos = snprintf(_buffer, sizeof (_buffer) - 1, "%s", publish_message_body);
             if (_bpos < 0 || ((size_t) _bpos) > (sizeof (_buffer) - 1)) {
                 printf("snprintf failed: %d\n", _bpos);
@@ -546,8 +545,7 @@ protected:
             Timer timer;
             timer.start();
             while (! _message_arrive_count) {
-                //if (timer.read_ms() >= MQTT_RECEIVE_MESSAGE_WITH_SUBSCRIBED_TOPIC_TIMEOUT_MS) {  //Ray closed
-                if (chrono::duration_cast<chrono::milliseconds>(timer.elapsed_time()).count()>= MQTT_RECEIVE_MESSAGE_WITH_SUBSCRIBED_TOPIC_TIMEOUT_MS) {  
+                if ((timer.elapsed_time()).count()/1000 >= MQTT_RECEIVE_MESSAGE_WITH_SUBSCRIBED_TOPIC_TIMEOUT_MS) {   
                     printf("MQTT receives message with subscribed %s TIMEOUT\n", topic);
                     break;
                 }
@@ -974,7 +972,7 @@ int main() {
     u32TimeData = ( u32TimeHour *100) + u32TimeMinute ;
     lcd_setSymbol(SYMBOL_TIME_DIG_COL1, 1);
     lcd_printNumber(ZONE_TIME_DIGIT, u32TimeData);
-    flipper.attach(&flip, 500ms);   //flipper.attach(&flip, 0.5); //Ray closed
+    flipper.attach(&flip, 500ms);   
 
     NetworkInterface *net = NetworkInterface::get_default_instance();
 
@@ -1023,7 +1021,7 @@ int main() {
 #ifdef TARGET_M2354
         /* Get information of data from PSA storage */
         psa_status_t retStatus;
-        //struct psa_storage_info_t data1_info; //Ray closed
+        //struct psa_storage_info_t data1_info; 
         size_t retLen;
         retStatus = psa_ps_get(uid_wifi_ssid, 0, sizeof(data_wifi_ssid), &data_wifi_ssid, &retLen);
         if (PSA_SUCCESS != retStatus) {
