@@ -106,12 +106,14 @@ const char SSL_USER_PRIV_KEY_PEM[] = "Input User Private Key";
 /* Uncomment and assign one unique MQTT client name; otherwise, one random will be assigned. */
 //#define AWS_IOT_MQTT_CLIENTNAME                 "Nuvoton Client"
 
+#ifndef NVT_DEMO_SENSOR
 /* User self-test topic */
 const char USER_MQTT_TOPIC[] = "Nuvoton/Mbed/D001";
 const char *USER_MQTT_TOPIC_FILTERS[] = {
     "Nuvoton/Mbed/+"
 };
 const char USER_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"message\": \"Hello from Nuvoton Mbed device\" }";
+#endif
 
 /* Update thing shadow */
 const char UPDATETHINGSHADOW_MQTT_TOPIC[] = "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/update";
@@ -127,6 +129,7 @@ const char UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"state\": { \"re
 const char UPDATETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "{ \"state\": { \"reported\": { \"clientName\":\"%s\", \"temperature\": %2.2f, \"humidity\": %2.2f, \"pressure\": %.2f } } }";
 #endif
 
+#ifndef NVT_DEMO_SENSOR
 /* Get thing shadow */
 const char GETTHINGSHADOW_MQTT_TOPIC[] = "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/get";
 const char *GETTHINGSHADOW_MQTT_TOPIC_FILTERS[] = {
@@ -142,6 +145,7 @@ const char *DELETETHINGSHADOW_MQTT_TOPIC_FILTERS[] = {
     "$aws/things/" AWS_IOT_MQTT_THINGNAME "/shadow/delete/rejected"
 };
 const char DELETETHINGSHADOW_MQTT_TOPIC_PUBLISH_MESSAGE[] = "";
+#endif
 
 /* MQTT user buffer size */
 const int MQTT_USER_BUFFER_SIZE = 600;
@@ -450,7 +454,7 @@ public:
                 temperature = bme680.getTemperature();
                 pressure = bme680.getPressure()/100;
                 humidity = bme680.getHumidity();
-                sprintf(cLcdStr, "%4dhPa", pressure);
+                sprintf(cLcdStr, "%4dhPa", (int)pressure);
                 lcd_printf(ZONE_MAIN_DIGIT, cLcdStr);
                 lcd_printNumberEx(ZONE_TEMP_DIGIT,temperature,2);
                 lcd_printNumberEx(ZONE_PPM_DIGIT, humidity, 2);
