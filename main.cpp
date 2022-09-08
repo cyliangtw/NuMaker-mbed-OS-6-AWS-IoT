@@ -1010,6 +1010,7 @@ int main() {
         wait_us(50*1000);
     }
     if( (choice == 'Y') || (choice == 'y') ) {
+move_set_wifi:
         printf("WiFi SSID:");
         scanf("%s", (char *)&my_ssid);
         printf("\nSSID=%s\r\n", my_ssid);
@@ -1039,15 +1040,21 @@ int main() {
         }
         retStatus = psa_ps_get(uid_wifi_passwd, 0, sizeof(data_wifi_passwd), &data_wifi_passwd, &retLen);
         if (PSA_SUCCESS != retStatus) {
-            strcpy(my_ssid, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD);
+            strcpy(my_passwd, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD);
         } else {
             strcpy(my_passwd, (const char*)data_wifi_passwd);
         }
 #else
         strcpy(my_ssid, MBED_CONF_NSAPI_DEFAULT_WIFI_SSID);
         strcpy(my_passwd, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD);
+
 #endif
         printf("\nDefault SSID=%s\r\n", my_ssid);
+        if (!strcmp(my_ssid, "SSID")) {
+            printf("### Can't find any WiFi SSID from PSA storage or not assign SSID in mbed_app.json file ###\r\n");
+            printf("### Please input your WiFi --> \r\n");
+            goto move_set_wifi;
+        }
     }
     status = (net->wifiInterface())->connect(my_ssid, my_passwd, NSAPI_SECURITY_WPA2,0);    
 #endif
